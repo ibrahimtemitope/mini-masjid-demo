@@ -35,13 +35,15 @@ export const CartDrawer: React.FC<Props> = ({
   const charityDkk = Math.round(totalDkk * 0.075);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm">
-      <div className="flex h-full w-full max-w-md flex-col justify-between bg-sand-50 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/45 backdrop-blur-sm">
+      <div className="flex h-full w-full max-w-md flex-col justify-between bg-sand-100 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-sand-300 bg-white px-6 py-5">
           <div className="flex items-center gap-2.5">
-            <ShoppingBag className="h-5 w-5 text-olive-800" />
-            <h3 className="font-display text-xl font-semibold text-olive-900">Your MiniMasjid Bag</h3>
+            <ShoppingBag className="h-5 w-5 text-olive-500" />
+            <h3 className="font-display text-xl font-semibold text-olive-800">
+              Your MiniMasjid Bag
+            </h3>
           </div>
           <button
             type="button"
@@ -54,13 +56,13 @@ export const CartDrawer: React.FC<Props> = ({
         </div>
 
         {/* Free Shipping Bar */}
-        <div className="bg-olive-100 px-6 py-2.5 text-center text-[13px] font-semibold text-olive-900">
-          <Truck className="mr-1.5 inline h-4 w-4 text-olive-700" />
+        <div className="bg-olive-50 px-6 py-2.5 text-center text-[13px] font-semibold text-olive-800">
+          <Truck className="mr-1.5 inline h-4 w-4 text-olive-500" />
           Unlocked: <strong>Free Worldwide Shipping</strong> on your order!
         </div>
 
         {/* Items */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-6">
           {items.length === 0 ? (
             <div className="py-16 text-center">
               <p className="font-display text-xl text-olive-800">Your bag is currently empty</p>
@@ -85,19 +87,19 @@ export const CartDrawer: React.FC<Props> = ({
                   />
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-[14.5px] font-bold text-olive-900">
+                      <p className="text-[14.5px] font-bold text-olive-800">
                         {item.bundleQty}× {item.edition.shortName}
                       </p>
                       <button
                         type="button"
                         onClick={() => onRemoveItem(item.id)}
-                        className="text-olive-600 hover:text-red-600"
+                        className="text-olive-600 hover:text-clay-600"
                         aria-label="Remove item"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
-                    <p className="mt-1 font-display text-lg font-bold text-olive-800">
+                    <p className="mt-1 font-display text-lg font-bold text-olive-700">
                       {formatPrice(finalDkk, currency)}
                     </p>
                     {item.giftNote && (
@@ -114,9 +116,9 @@ export const CartDrawer: React.FC<Props> = ({
 
         {/* Footer Checkout */}
         {items.length > 0 && (
-          <div className="border-t border-sand-300 bg-white p-6 space-y-4">
-            <div className="flex items-center gap-2 rounded-xl bg-olive-50 px-3.5 py-2.5 text-[12.5px] text-olive-900">
-              <Heart className="h-4 w-4 shrink-0 text-olive-700" />
+          <div className="space-y-4 border-t border-sand-300 bg-white p-6">
+            <div className="flex items-center gap-2 rounded-xl bg-clay-50 px-3.5 py-2.5 text-[12.5px] text-olive-900">
+              <Heart className="h-4 w-4 shrink-0 text-clay-500" />
               <span>
                 Includes <strong>{formatPrice(charityDkk, currency)}</strong> (7.5%) toward community
                 giveback projects.
@@ -125,7 +127,7 @@ export const CartDrawer: React.FC<Props> = ({
 
             <div className="flex items-baseline justify-between">
               <span className="text-[15px] font-semibold text-olive-800">Total (Free Shipping)</span>
-              <span className="font-display text-2xl font-bold text-olive-900">
+              <span className="font-display text-2xl font-bold text-olive-800">
                 {formatPrice(totalDkk, currency)}
               </span>
             </div>
@@ -134,10 +136,10 @@ export const CartDrawer: React.FC<Props> = ({
               href={`https://minimasjidstore.com/products/${items[0].edition.shopifyHandle}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-olive-800 px-6 py-4 text-[15.5px] font-bold text-sand-50 hover:bg-olive-900"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-olive-500 px-6 py-4 text-[15.5px] font-bold text-white hover:bg-olive-600"
             >
               <span>Proceed to Shopify Checkout</span>
-              <ExternalLink className="h-4 w-4 text-dome-300" />
+              <ExternalLink className="h-4 w-4 text-dome-100" />
             </a>
           </div>
         )}

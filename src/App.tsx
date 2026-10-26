@@ -11,6 +11,7 @@ import {
   InteractiveMasjid3DAtelier,
   MasjidVariant,
 } from './components/InteractiveMasjid3DAtelier';
+import { ReviewsSection } from './components/ReviewsSection';
 import { ScaleAndChildComparator } from './components/ScaleAndChildComparator';
 import { EditionsAndBundleSection } from './components/EditionsAndBundleSection';
 import { StoryFaqFooterSection } from './components/StoryFaqFooterSection';
@@ -57,7 +58,7 @@ export const App: React.FC = () => {
   const totalBagCount = cartItems.reduce((sum, i) => sum + i.bundleQty, 0);
 
   return (
-    <div className="min-h-screen bg-sand-50 text-olive-900">
+    <div className="min-h-screen bg-sand-100 text-olive-800">
       <NavbarAndMarquee
         currency={currency}
         onCurrencyChange={setCurrency}
@@ -65,21 +66,11 @@ export const App: React.FC = () => {
         onOpenCart={() => setCartOpen(true)}
       />
 
-      <main>
-        {/* 1. 3D Parallax Sanctuary Hero + Cozy Lantern Glow Switch */}
+      <main className="bg-sand-100">
+        {/* 1. First Screen: Clean Real-Life Home Photo First + Warm Brand Hook */}
         <HeroSanctuary3D currency={currency} onJumpTo3D={jumpTo3D} />
 
-        {/* 2. WebGL 3D Hologram, 360° Hold-In-Hand, Underneath Dome View & Fold-From-Flat Studio */}
-        <InteractiveMasjid3DAtelier
-          activeVariant={active3DVariant}
-          onVariantChange={setActive3DVariant}
-          onSelectForPurchase={selectFrom3DForPurchase}
-        />
-
-        {/* 3. Interactive 145 cm Kid-Height & Flat-Behind-Sofa Comparator */}
-        <ScaleAndChildComparator />
-
-        {/* 4. All 3 Editions Pedestal Grid + Sibling/Madrasah Bundle Configurator */}
+        {/* 2. All 3 Editions Pedestal Grid + Sibling/Madrasah Bundle Configurator */}
         <EditionsAndBundleSection
           currency={currency}
           selectedEditionId={selectedEditionId}
@@ -88,7 +79,20 @@ export const App: React.FC = () => {
           onAddToBag={handleAddToBag}
         />
 
-        {/* 5. Brand Story, Real HD Video, FAQ & Heirloom Footer */}
+        {/* 3. Unified Warm Studio 3D Interactive Masjid (360° Spin, Flip Underneath, Fold-From-Flat) */}
+        <InteractiveMasjid3DAtelier
+          activeVariant={active3DVariant}
+          onVariantChange={setActive3DVariant}
+          onSelectForPurchase={selectFrom3DForPurchase}
+        />
+
+        {/* 4. Parent Reviews Section (Placeholder names & reviews ready for Jacub's real ones) */}
+        <ReviewsSection />
+
+        {/* 5. Interactive 145 cm Kid-Height & 3-Step Fold-Flat Showcase */}
+        <ScaleAndChildComparator />
+
+        {/* 6. Brand Story, Real HD Video, FAQ & Signature Olive Footer */}
         <StoryFaqFooterSection />
       </main>
 

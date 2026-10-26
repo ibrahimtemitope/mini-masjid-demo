@@ -5,32 +5,42 @@ export default {
     extend: {
       colors: {
         sand: {
-          50: '#FDFBF7',
-          100: '#F8F4EC',
-          200: '#EFE8D8',
-          300: '#DFD3BC',
-          400: '#CBB999',
+          50: '#FBF9F4',
+          100: '#F7F3E9', // Signature unified MiniMasjid warm cream background
+          200: '#EDE5D4',
+          300: '#DDD4BF',
+          400: '#C8B99B',
         },
         olive: {
-          50: '#F4F6EF',
-          100: '#E7ECDC',
-          200: '#CFDBBA',
-          500: '#6D7B49',
-          600: '#586638',
-          700: '#434F2A',
-          800: '#2E371C',
-          900: '#1D2412',
+          50: '#F3F6EC',
+          100: '#E5ECD6',
+          200: '#C9D8AD',
+          500: '#738447', // Signature MiniMasjid olive accent
+          600: '#5F7038',
+          700: '#49572A',
+          800: '#344128', // Signature MiniMasjid deep olive text/CTA
+          900: '#232C1B',
         },
         dome: {
-          300: '#EBD197',
-          400: '#D8B365',
-          500: '#C39844',
-          600: '#9E772B',
+          50: '#FDF6E4',
+          100: '#FAEBCA',
+          300: '#E9CC87',
+          400: '#D8AE52',
+          500: '#C59632', // Standout Accent #2: Warm Dome Gold (stars & highlights)
+          600: '#9B731F',
         },
         aqsa: {
-          500: '#244A8A',
-          600: '#1B386B',
-          700: '#13274D',
+          50: '#EEF3FA',
+          100: '#DCE6F5',
+          500: '#2B5696', // Standout Accent #3: Royal Al-Aqsa Blue (3D & patent tags)
+          600: '#1F4175',
+          700: '#162F57',
+        },
+        clay: {
+          50: '#FDF0EB',
+          100: '#FADCD1',
+          500: '#C05D3B', // Standout Accent #4: Warm Terracotta (7.5% giveback & savings)
+          600: '#9E482B',
         },
         night: {
           900: '#0D131A',
@@ -43,9 +53,8 @@ export default {
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {
-        plush: '0 24px 60px -20px rgba(29, 36, 18, 0.12)',
-        'plush-lg': '0 34px 80px -24px rgba(29, 36, 18, 0.20)',
-        hologram: '0 0 50px -10px rgba(74, 222, 180, 0.32)',
+        plush: '0 20px 50px -20px rgba(52, 65, 40, 0.11)',
+        'plush-lg': '0 28px 70px -24px rgba(52, 65, 40, 0.17)',
       },
     },
   },

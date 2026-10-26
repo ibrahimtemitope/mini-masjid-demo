@@ -45,17 +45,22 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
   const discountedTotalDkk = Math.round(rawTotalDkk * (1 - activeBundle.discountPct));
   const givebackDkk = Math.round(discountedTotalDkk * 0.075);
 
+  const getBadgeClasses = (tone: 'aqsa' | 'olive' | 'dome') => {
+    if (tone === 'aqsa') return 'bg-aqsa-50 text-aqsa-600 border border-aqsa-500/20';
+    if (tone === 'dome') return 'bg-dome-50 text-dome-600 border border-dome-400/35';
+    return 'bg-olive-50 text-olive-700 border border-olive-500/25';
+  };
+
   return (
-    <section id="editions" className="bg-sand-50 py-20 sm:py-28">
+    <section id="editions" className="bg-sand-100 py-16 sm:py-24">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         {/* Part 1: All 3 Real Editions Pedestal Showcase */}
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[12.5px] font-bold uppercase tracking-[0.16em] text-olive-600">
             Explore Our Complete Collection
           </p>
-          <h2 className="mt-3 font-display text-3xl font-medium text-olive-900 sm:text-5xl">
-            Three Patented Editions.{' '}
-            <span className="italic text-olive-600">Crafted in Exclusive Batches.</span>
+          <h2 className="mt-3 font-display text-3xl font-medium text-olive-800 sm:text-5xl">
+            Three Patented Editions, Crafted in Exclusive Batches
           </h2>
           <p className="mt-4 text-[16.5px] leading-relaxed text-olive-800/80">
             Choose between our two full-size <strong>145 cm Walk-In XL Sanctuaries</strong> or our
@@ -71,15 +76,19 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
             return (
               <div
                 key={edition.id}
-                className={`group flex flex-col justify-between rounded-[2rem] border p-6 transition-all duration-300 hover:-translate-y-1.5 sm:p-7 ${
+                className={`group flex flex-col justify-between rounded-[2rem] border bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 sm:p-7 ${
                   isSelected
-                    ? 'border-olive-800 bg-white shadow-plush-lg ring-2 ring-olive-800/15'
-                    : 'border-sand-300 bg-white/90 shadow-plush hover:border-olive-600/50'
+                    ? 'border-olive-500 shadow-plush-lg ring-2 ring-olive-500/20'
+                    : 'border-sand-300 shadow-plush hover:border-olive-500/50'
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="rounded-full bg-sand-100 px-3.5 py-1 text-[12px] font-bold text-olive-800">
+                    <span
+                      className={`rounded-full px-3.5 py-1 text-[12px] font-bold ${getBadgeClasses(
+                        edition.badgeTone
+                      )}`}
+                    >
                       {edition.badge}
                     </span>
                     <span className="font-mono text-[12px] font-semibold text-olive-600">
@@ -98,21 +107,21 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
                       <button
                         type="button"
                         onClick={() => onInspectIn3D(edition.threeModelVariant)}
-                        className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-night-950/80 px-3 py-1.5 text-[11.5px] font-semibold text-sand-50 backdrop-blur-md hover:bg-night-950"
+                        className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-aqsa-500/25 bg-white/95 px-3 py-1.5 text-[11.5px] font-bold text-aqsa-600 shadow-sm backdrop-blur-md hover:bg-aqsa-50"
                       >
-                        <Rotate3d className="h-3.5 w-3.5 text-dome-300" />
+                        <Rotate3d className="h-3.5 w-3.5 text-aqsa-500" />
                         <span>View in 3D</span>
                       </button>
                     )}
                   </div>
 
                   <div className="mt-5 flex items-baseline justify-between gap-2">
-                    <h3 className="font-display text-xl font-semibold text-olive-900">
+                    <h3 className="font-display text-xl font-semibold text-olive-800">
                       {edition.name}
                     </h3>
                   </div>
 
-                  <p className="mt-1 font-display text-2xl font-bold text-olive-800">
+                  <p className="mt-1 font-display text-2xl font-bold text-olive-700">
                     {formatPrice(edition.priceDkk, currency)}
                   </p>
 
@@ -125,7 +134,7 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
                   <ul className="space-y-2 text-[13.5px] text-olive-800">
                     {edition.highlights.slice(0, 3).map((hl, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-olive-600" />
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-olive-500" />
                         <span>{hl}</span>
                       </li>
                     ))}
@@ -137,8 +146,8 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
                   onClick={() => onSelectEdition(edition.id)}
                   className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-5 py-3.5 text-[14.5px] font-bold transition-colors ${
                     isSelected
-                      ? 'bg-olive-800 text-sand-50 hover:bg-olive-900'
-                      : 'border border-olive-800/20 bg-sand-100 text-olive-900 hover:bg-sand-200'
+                      ? 'bg-olive-500 text-white hover:bg-olive-600'
+                      : 'border border-sand-300 bg-sand-100 text-olive-800 hover:bg-sand-200'
                   }`}
                 >
                   {isSelected ? 'Selected in Configurator ↓' : `Select ${edition.shortName}`}
@@ -148,21 +157,21 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
           })}
         </div>
 
-        {/* Part 2: Flagship Family & Sibling Bundle Configurator (Replaces raw "BUY IN BULK" app!) */}
+        {/* Part 2: Flagship Family & Sibling Bundle Configurator */}
         <div
           id="bundle-builder"
           className="mt-20 overflow-hidden rounded-[2.25rem] border border-sand-300 bg-white shadow-plush-lg"
         >
           <div className="grid lg:grid-cols-12">
             {/* Left Gallery & Batch Transparency */}
-            <div className="flex flex-col justify-between bg-sand-100/75 p-7 sm:p-10 lg:col-span-5">
+            <div className="flex flex-col justify-between bg-sand-50 p-7 sm:p-10 lg:col-span-5">
               <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-olive-800 px-3.5 py-1 text-[11.5px] font-semibold text-sand-50">
-                  <Truck className="h-3.5 w-3.5 text-dome-300" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-olive-500 px-3.5 py-1 text-[11.5px] font-bold text-white">
+                  <Truck className="h-3.5 w-3.5 text-dome-100" />
                   <span>Exclusive Batch · Free Worldwide Shipping</span>
                 </span>
 
-                <h3 className="mt-4 font-display text-2xl font-semibold text-olive-900 sm:text-3xl">
+                <h3 className="mt-4 font-display text-2xl font-semibold text-olive-800 sm:text-3xl">
                   {activeEdition.name}
                 </h3>
                 <p className="mt-1 font-mono text-[13px] font-semibold text-olive-600">
@@ -178,13 +187,13 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
                 </div>
               </div>
 
-              <div className="mt-6 rounded-2xl border border-olive-600/20 bg-olive-50 p-4">
+              <div className="mt-6 rounded-2xl border border-clay-500/20 bg-clay-50 p-4">
                 <div className="flex items-start gap-3">
-                  <Heart className="mt-0.5 h-5 w-5 shrink-0 text-olive-700" />
+                  <Heart className="mt-0.5 h-5 w-5 shrink-0 text-clay-500" />
                   <p className="text-[13.5px] leading-relaxed text-olive-900">
-                    <strong>7.5% Sadaqah & Community Pledge:</strong> Your order contributes{' '}
-                    <strong>{formatPrice(givebackDkk, currency)}</strong> directly toward meaningful
-                    community & children’s projects.
+                    <strong className="text-clay-600">7.5% Sadaqah &amp; Community Pledge:</strong>{' '}
+                    Your order contributes <strong>{formatPrice(givebackDkk, currency)}</strong>{' '}
+                    directly toward meaningful community &amp; children’s projects.
                   </p>
                 </div>
               </div>
@@ -207,12 +216,12 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
                         onClick={() => onSelectEdition(ed.id)}
                         className={`rounded-2xl border p-3.5 text-left transition-all ${
                           active
-                            ? 'border-olive-800 bg-olive-50 ring-2 ring-olive-800/15'
-                            : 'border-sand-300 bg-white hover:border-olive-600/40'
+                            ? 'border-olive-500 bg-olive-50 ring-2 ring-olive-500/15'
+                            : 'border-sand-300 bg-white hover:border-olive-500/40'
                         }`}
                       >
-                        <p className="text-[14px] font-bold text-olive-900">{ed.shortName}</p>
-                        <p className="mt-0.5 text-[13px] font-semibold text-olive-700">
+                        <p className="text-[14px] font-bold text-olive-800">{ed.shortName}</p>
+                        <p className="mt-0.5 text-[13px] font-semibold text-olive-600">
                           {formatPrice(ed.priceDkk, currency)}
                         </p>
                       </button>
@@ -239,26 +248,32 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
                         onClick={() => setBundleQty(tier.qty)}
                         className={`flex w-full items-center justify-between gap-4 rounded-2xl border p-4 text-left transition-all ${
                           active
-                            ? 'border-olive-800 bg-olive-50/85 ring-2 ring-olive-800/15'
-                            : 'border-sand-300 bg-white hover:border-olive-600/40'
+                            ? 'border-olive-500 bg-olive-50/75 ring-2 ring-olive-500/15'
+                            : 'border-sand-300 bg-white hover:border-olive-500/40'
                         }`}
                       >
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[15.5px] font-bold text-olive-900">
+                            <span className="text-[15.5px] font-bold text-olive-800">
                               {tier.title}
                             </span>
                             {tier.tag && (
-                              <span className="rounded-full bg-dome-400/35 px-2.5 py-0.5 text-[11.5px] font-bold text-olive-900">
+                              <span
+                                className={`rounded-full px-2.5 py-0.5 text-[11.5px] font-bold ${
+                                  tier.tagTone === 'clay'
+                                    ? 'bg-clay-100 text-clay-600'
+                                    : 'bg-dome-100 text-dome-600'
+                                }`}
+                              >
                                 {tier.tag}
                               </span>
                             )}
                           </div>
-                          <p className="mt-0.5 text-[13.5px] text-olive-700">{tier.subtitle}</p>
+                          <p className="mt-0.5 text-[13.5px] text-olive-700/85">{tier.subtitle}</p>
                         </div>
 
                         <div className="text-right">
-                          <p className="font-display text-xl font-bold text-olive-900">
+                          <p className="font-display text-xl font-bold text-olive-800">
                             {formatPrice(tierFinal, currency)}
                           </p>
                           {tier.discountPct > 0 && (
@@ -274,15 +289,15 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
               </div>
 
               {/* Optional Ramadan / Eid Gift Note */}
-              <div className="mt-6 rounded-2xl border border-sand-300 bg-sand-50/70 p-4">
-                <label className="flex cursor-pointer items-center gap-2.5 text-[14px] font-semibold text-olive-900">
+              <div className="mt-6 rounded-2xl border border-sand-300 bg-sand-100/70 p-4">
+                <label className="flex cursor-pointer items-center gap-2.5 text-[14px] font-semibold text-olive-800">
                   <input
                     type="checkbox"
                     checked={includeGiftCard}
                     onChange={(e) => setIncludeGiftCard(e.target.checked)}
-                    className="h-4 w-4 rounded accent-olive-800"
+                    className="h-4 w-4 rounded accent-olive-500"
                   />
-                  <Gift className="h-4 w-4 text-dome-600" />
+                  <Gift className="h-4 w-4 text-dome-500" />
                   <span>Sending as a Ramadan, Eid, or Birthday gift? Add a free note</span>
                 </label>
 
@@ -292,7 +307,7 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
                     value={giftNote}
                     onChange={(e) => setGiftNote(e.target.value)}
                     placeholder="Write your heartfelt dua or gift message for the child..."
-                    className="mt-3 w-full rounded-xl border border-sand-300 bg-white px-3.5 py-2.5 text-[14.5px] text-olive-900 focus:border-olive-700 focus:outline-none"
+                    className="mt-3 w-full rounded-xl border border-sand-300 bg-white px-3.5 py-2.5 text-[14.5px] text-olive-800 focus:border-olive-500 focus:outline-none"
                   />
                 )}
               </div>
@@ -303,18 +318,18 @@ export const EditionsAndBundleSection: React.FC<Props> = ({
                 onClick={() =>
                   onAddToBag(activeEdition, bundleQty, includeGiftCard ? giftNote : '')
                 }
-                className="mt-7 inline-flex w-full items-center justify-center gap-3 rounded-full bg-olive-800 px-7 py-4 text-[16px] font-bold text-sand-50 shadow-plush transition-all hover:-translate-y-0.5 hover:bg-olive-900"
+                className="mt-7 inline-flex w-full items-center justify-center gap-3 rounded-full bg-olive-500 px-7 py-4 text-[16px] font-bold text-white shadow-plush transition-all hover:-translate-y-0.5 hover:bg-olive-600"
               >
-                <ShoppingBag className="h-5 w-5 text-dome-300" />
+                <ShoppingBag className="h-5 w-5 text-dome-100" />
                 <span>
                   Add to Bag — {formatPrice(discountedTotalDkk, currency)} (Free Shipping)
                 </span>
               </button>
 
               <p className="mt-3.5 flex items-center justify-center gap-2 text-center text-[13px] text-olive-700">
-                <ShieldCheck className="h-4 w-4 text-olive-600" />
+                <ShieldCheck className="h-4 w-4 text-olive-500" />
                 <span>
-                  Ships from Aarhus, Denmark · Apple Pay, MobilePay, Klarna & Shop Pay supported
+                  Ships from Aarhus, Denmark · Apple Pay, MobilePay, Klarna &amp; Shop Pay supported
                 </span>
               </p>
             </div>

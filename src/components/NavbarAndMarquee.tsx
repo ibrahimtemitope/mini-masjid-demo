@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, Menu, ShoppingBag, Sparkles, X } from 'lucide-react';
+import { Globe, Menu, Rotate3d, ShoppingBag, X } from 'lucide-react';
 import { CURRENCIES, CurrencyCode } from '../data/storeData';
 
 interface Props {
@@ -26,18 +26,18 @@ export const NavbarAndMarquee: React.FC<Props> = ({
   ];
 
   const navLinks = [
-    { href: '#atelier-3d', label: '3D Hologram Studio', highlight: true },
+    { href: '#atelier-3d', label: '3D Interactive View', highlight: true },
     { href: '#editions', label: 'All 3 Editions' },
+    { href: '#reviews', label: 'Reviews' },
     { href: '#scale-visualizer', label: '145 cm Size Check' },
     { href: '#bundle-builder', label: 'Sibling Bundles' },
-    { href: '#our-story', label: 'Our Story' },
     { href: '#faq', label: 'FAQ' },
   ];
 
   return (
     <>
-      {/* Silky Continuous Announcement Bar */}
-      <div className="overflow-hidden bg-olive-800 py-2.5 text-[12.5px] font-medium tracking-wide text-sand-100">
+      {/* Signature Olive Announcement Bar */}
+      <div className="overflow-hidden bg-olive-500 py-2 text-[12px] font-semibold tracking-wide text-white">
         <div className="animate-marquee gap-12">
           {[...marqueeItems, ...marqueeItems].map((text, idx) => (
             <span key={idx} className="mx-7 whitespace-nowrap">
@@ -47,45 +47,45 @@ export const NavbarAndMarquee: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Floating Frosted Glass Header */}
-      <header className="sticky top-0 z-40 border-b border-sand-300/80 bg-sand-50/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-[76px] max-w-[1280px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      {/* Unified Warm Cream Header (#F7F3E9) */}
+      <header className="sticky top-0 z-40 border-b border-sand-300/90 bg-sand-100/95 backdrop-blur-md">
+        <div className="mx-auto flex h-[68px] max-w-[1280px] items-center justify-between gap-4 px-4 sm:h-[74px] sm:px-6 lg:px-8">
           {/* Official MiniMasjid Logo */}
           <a href="#top" className="flex shrink-0 items-center gap-2.5">
             <img
               src="/assets/logo.png"
               alt="MiniMasjid"
-              className="h-14 w-auto object-contain"
+              className="h-12 w-auto object-contain sm:h-14"
             />
           </a>
 
           {/* Desktop Navigation */}
-          <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
+          <nav className="hidden items-center gap-5 lg:flex xl:gap-7">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 className={`whitespace-nowrap text-[14px] font-semibold transition-colors ${
                   link.highlight
-                    ? 'inline-flex items-center gap-1.5 rounded-full border border-dome-400/50 bg-dome-300/25 px-3.5 py-1.5 text-olive-900 hover:bg-dome-300/45'
-                    : 'text-olive-700 hover:text-olive-900'
+                    ? 'inline-flex items-center gap-1.5 rounded-full border border-aqsa-500/25 bg-aqsa-50 px-3.5 py-1.5 text-aqsa-600 hover:bg-aqsa-100'
+                    : 'text-olive-800/85 hover:text-olive-900'
                 }`}
               >
-                {link.highlight && <Sparkles className="h-3.5 w-3.5 text-dome-600" />}
+                {link.highlight && <Rotate3d className="h-3.5 w-3.5 text-aqsa-500" />}
                 <span>{link.label}</span>
               </a>
             ))}
           </nav>
 
           {/* Right Controls: Multi-Currency + Interactive Bag */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="relative flex items-center rounded-full border border-sand-300 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-olive-800">
-              <Globe className="mr-1.5 h-3.5 w-3.5 text-olive-600" />
+              <Globe className="mr-1.5 h-3.5 w-3.5 text-olive-500" />
               <select
                 value={currency}
                 onChange={(e) => onCurrencyChange(e.target.value as CurrencyCode)}
                 aria-label="Select currency"
-                className="cursor-pointer bg-transparent pr-1 font-semibold text-olive-900 focus:outline-none"
+                className="cursor-pointer bg-transparent pr-1 font-semibold text-olive-800 focus:outline-none"
               >
                 {(Object.keys(CURRENCIES) as CurrencyCode[]).map((code) => (
                   <option key={code} value={code}>
@@ -98,11 +98,11 @@ export const NavbarAndMarquee: React.FC<Props> = ({
             <button
               type="button"
               onClick={onOpenCart}
-              className="inline-flex items-center gap-2 rounded-full bg-olive-800 px-4 py-2.5 text-[13.5px] font-semibold text-sand-50 transition-all hover:bg-olive-900"
+              className="inline-flex items-center gap-2 rounded-full bg-olive-500 px-4 py-2 text-[13.5px] font-semibold text-white transition-all hover:bg-olive-600"
             >
-              <ShoppingBag className="h-4 w-4 text-dome-300" />
+              <ShoppingBag className="h-4 w-4 text-dome-100" />
               <span className="hidden sm:inline">Bag</span>
-              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-dome-400 px-1.5 text-[11.5px] font-bold text-night-950">
+              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-dome-500 px-1.5 text-[11.5px] font-bold text-white">
                 {cartCount}
               </span>
             </button>
@@ -111,7 +111,7 @@ export const NavbarAndMarquee: React.FC<Props> = ({
               type="button"
               onClick={() => setMobileOpen((p) => !p)}
               aria-label="Toggle Menu"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-sand-300 bg-white text-olive-900 lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-sand-300 bg-white text-olive-800 lg:hidden"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -120,14 +120,14 @@ export const NavbarAndMarquee: React.FC<Props> = ({
 
         {/* Mobile Drawer */}
         {mobileOpen && (
-          <div className="border-t border-sand-300 bg-sand-50 px-5 py-5 lg:hidden">
-            <div className="flex flex-col space-y-2">
+          <div className="border-t border-sand-300 bg-sand-100 px-5 py-4 lg:hidden">
+            <div className="flex flex-col space-y-1.5">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="rounded-xl px-3.5 py-2.5 text-[16px] font-semibold text-olive-900 hover:bg-sand-200/70"
+                  className="rounded-xl px-3.5 py-2.5 text-[16px] font-semibold text-olive-800 hover:bg-white"
                 >
                   {link.label}
                 </a>
