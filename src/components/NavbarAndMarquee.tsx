@@ -21,8 +21,8 @@ export const NavbarAndMarquee: React.FC<Props> = ({
     { href: '#editions', label: 'Shop' },
     { href: '#how-it-works', label: 'How It Works' },
     { href: '#atelier-3d', label: '3D View' },
+    { href: '#mission', label: 'Our Mission' },
     { href: '#reviews', label: 'Reviews' },
-    { href: '#faq', label: 'FAQ' },
   ];
 
   return (
