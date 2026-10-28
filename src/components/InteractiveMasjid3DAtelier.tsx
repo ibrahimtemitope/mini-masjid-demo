@@ -1,19 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import {
-  Box,
-  Eye,
-  Flame,
-  Layers,
-  Pause,
-  Play,
-  Rotate3d,
-  Sparkles,
-  Sun,
-} from 'lucide-react';
+import { Flame, Play, Rotate3d, Sun } from 'lucide-react';
 
-export type VisualMode = 'studio' | 'hologram' | 'ramadan';
+export type VisualMode = 'studio' | 'ramadan';
 export type MasjidVariant = 'aqsa' | 'nabawi';
 
 interface Props {
@@ -22,11 +12,6 @@ interface Props {
   onSelectForPurchase: (variant: MasjidVariant) => void;
 }
 
-/**
- * Generates high-resolution procedural facade textures matching Jacub's exact real products:
- * - Al-Aqsa XL: Limestone grid, royal cobalt & turquoise arabesque frieze, "AL AQSA" plaque, stained-glass windows
- * - Nabawi XL: Kraft sand board, Madinah emerald frieze, "BAB AS SALAM" plaque, green mashrabiya windows & lanterns
- */
 function createFacadeTexture(variant: MasjidVariant, isFront: boolean): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
@@ -80,11 +65,6 @@ function createFacadeTexture(variant: MasjidVariant, isFront: boolean): THREE.Ca
     ctx.strokeStyle = '#DFC68C';
     ctx.lineWidth = 3;
     ctx.strokeRect(8, 26, 1008, 50);
-    for (let x = 28; x < 996; x += 44) {
-      ctx.beginPath();
-      ctx.arc(x, 51, 11, 0, Math.PI, true);
-      ctx.stroke();
-    }
 
     const drawAqsaWindow = (cx: number, cy: number, w: number, h: number) => {
       ctx.save();
@@ -145,13 +125,6 @@ function createFacadeTexture(variant: MasjidVariant, isFront: boolean): THREE.Ca
     ctx.fillStyle = '#D7B98E';
     ctx.fillRect(0, 0, 1024, 1024);
 
-    ctx.fillStyle = 'rgba(130, 95, 52, 0.05)';
-    for (let i = 0; i < 600; i++) {
-      const rx = (i * 173) % 1024;
-      const ry = (i * 293) % 1024;
-      ctx.fillRect(rx, ry, 28, 2);
-    }
-
     ctx.fillStyle = '#254F35';
     ctx.fillRect(0, 36, 1024, 52);
     ctx.strokeStyle = '#D8B669';
@@ -195,20 +168,6 @@ function createFacadeTexture(variant: MasjidVariant, isFront: boolean): THREE.Ca
     drawNabawiWindow(819, 380, 135, 220);
     drawNabawiWindow(205, 760, 96, 155);
     drawNabawiWindow(819, 760, 96, 155);
-
-    const drawLantern = (lx: number, ly: number) => {
-      ctx.strokeStyle = '#1E3F2B';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(lx, ly - 55);
-      ctx.lineTo(lx, ly - 25);
-      ctx.stroke();
-      ctx.fillStyle = '#E6C44E';
-      ctx.fillRect(lx - 16, ly - 25, 32, 42);
-      ctx.strokeRect(lx - 16, ly - 25, 32, 42);
-    };
-    drawLantern(74, 560);
-    drawLantern(950, 560);
 
     if (isFront) {
       ctx.fillStyle = '#254F35';
@@ -279,27 +238,14 @@ function createDomeTexture(variant: MasjidVariant): THREE.CanvasTexture {
 export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
   activeVariant,
   onVariantChange,
-  onSelectForPurchase,
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
-
-  // Default to warm Daylight Studio so the entire website flows in one cohesive cream palette!
   const [visualMode, setVisualMode] = useState<VisualMode>('studio');
   const [assemblyPct, setAssemblyPct] = useState<number>(100);
   const [isAutoBuilding, setIsAutoBuilding] = useState<boolean>(false);
-  const [cameraPreset, setCameraPreset] = useState<'orbit' | 'underneath' | 'doorway' | 'top'>('orbit');
 
   const assemblyRef = useRef<number>(100);
   const modeRef = useRef<VisualMode>('studio');
-  const cameraTargetPresetRef = useRef<{
-    pos: THREE.Vector3;
-    target: THREE.Vector3;
-    active: boolean;
-  }>({
-    pos: new THREE.Vector3(3.1, 2.15, 3.6),
-    target: new THREE.Vector3(0, 0.95, 0),
-    active: false,
-  });
 
   useEffect(() => {
     assemblyRef.current = assemblyPct;
@@ -318,7 +264,7 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
       const dt = (now - lastTime) / 1000;
       lastTime = now;
       setAssemblyPct((prev) => {
-        const next = prev + dt * 24;
+        const next = prev + dt * 26;
         if (next >= 100) {
           setIsAutoBuilding(false);
           return 100;
@@ -332,40 +278,6 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
     return () => cancelAnimationFrame(rafId);
   }, [isAutoBuilding]);
 
-  const triggerAutoBuild = () => {
-    setAssemblyPct(0);
-    setIsAutoBuilding(true);
-  };
-
-  const applyCameraPreset = (preset: 'orbit' | 'underneath' | 'doorway' | 'top') => {
-    setCameraPreset(preset);
-    if (preset === 'orbit') {
-      cameraTargetPresetRef.current = {
-        pos: new THREE.Vector3(3.05, 2.05, 3.55),
-        target: new THREE.Vector3(0, 0.95, 0),
-        active: true,
-      };
-    } else if (preset === 'underneath') {
-      cameraTargetPresetRef.current = {
-        pos: new THREE.Vector3(1.15, -1.55, 1.55),
-        target: new THREE.Vector3(0, 1.05, 0),
-        active: true,
-      };
-    } else if (preset === 'doorway') {
-      cameraTargetPresetRef.current = {
-        pos: new THREE.Vector3(0, 0.62, 2.65),
-        target: new THREE.Vector3(0, 0.72, -0.2),
-        active: true,
-      };
-    } else if (preset === 'top') {
-      cameraTargetPresetRef.current = {
-        pos: new THREE.Vector3(0.01, 4.5, 0.8),
-        target: new THREE.Vector3(0, 0.8, 0),
-        active: true,
-      };
-    }
-  };
-
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -373,12 +285,12 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(
-      40,
+      38,
       container.clientWidth / container.clientHeight,
       0.1,
       100
     );
-    camera.position.set(3.05, 2.05, 3.55);
+    camera.position.set(2.95, 1.95, 3.45);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -391,31 +303,20 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
-    controls.target.set(0, 0.95, 0);
-    controls.minPolarAngle = 0.04;
-    controls.maxPolarAngle = Math.PI - 0.04;
-    controls.minDistance = 1.65;
-    controls.maxDistance = 6.8;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.9;
+    controls.target.set(0, 0.92, 0);
+    controls.minPolarAngle = 0.1;
+    controls.maxPolarAngle = Math.PI / 2 + 0.15;
+    controls.minDistance = 1.9;
+    controls.maxDistance = 5.8;
 
-    const stopPresetOnInteract = () => {
-      cameraTargetPresetRef.current.active = false;
-    };
-    controls.addEventListener('start', stopPresetOnInteract);
-
-    const ambientLight = new THREE.AmbientLight(0xfff8eb, 1.45);
+    const ambientLight = new THREE.AmbientLight(0xfff8eb, 1.5);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfff4dc, 1.9);
+    const keyLight = new THREE.DirectionalLight(0xfff4dc, 1.95);
     keyLight.position.set(4, 6, 4.5);
     scene.add(keyLight);
-
-    const rimLight = new THREE.DirectionalLight(0x9bd7ff, 0.75);
-    rimLight.position.set(-4, 3, -4);
-    scene.add(rimLight);
-
-    const bottomFillLight = new THREE.DirectionalLight(0xffe7ba, 0.8);
-    bottomFillLight.position.set(0, -4, 1);
-    scene.add(bottomFillLight);
 
     const interiorLanternLight = new THREE.PointLight(0xff9b26, 0, 5.5, 1.5);
     interiorLanternLight.position.set(0, 0.65, 0);
@@ -428,43 +329,23 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
     lanternOrb.position.set(0, 0.25, -0.15);
     scene.add(lanternOrb);
 
-    const floorGroup = new THREE.Group();
-    const gridHelper = new THREE.GridHelper(4.4, 22, 0xbdb197, 0xdad0bc);
-    (gridHelper.material as THREE.Material).transparent = true;
-    (gridHelper.material as THREE.Material).opacity = 0.45;
-    floorGroup.add(gridHelper);
-
     const outerRing = new THREE.Mesh(
-      new THREE.RingGeometry(1.52, 1.55, 64),
+      new THREE.RingGeometry(1.48, 1.5, 64),
       new THREE.MeshBasicMaterial({
         color: 0xc59632,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.48,
+        opacity: 0.35,
       })
     );
     outerRing.rotation.x = -Math.PI / 2;
     outerRing.position.y = 0.004;
-    floorGroup.add(outerRing);
-
-    scene.add(floorGroup);
-
-    const scanPlane = new THREE.Mesh(
-      new THREE.RingGeometry(0.15, 1.48, 48),
-      new THREE.MeshBasicMaterial({
-        color: 0x48f0c2,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.0,
-      })
-    );
-    scanPlane.rotation.x = -Math.PI / 2;
-    scene.add(scanPlane);
+    scene.add(outerRing);
 
     const masjidRoot = new THREE.Group();
     scene.add(masjidRoot);
 
-    const W = 1.60;
+    const W = 1.6;
     const H = 1.24;
     const T = 0.028;
 
@@ -494,18 +375,18 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
       map: domeTex,
       roughness: 0.42,
       metalness: activeVariant === 'aqsa' ? 0.38 : 0.12,
+      side: THREE.DoubleSide,
     });
 
-    const drumColor = activeVariant === 'aqsa' ? 0x1b3a73 : 0x254f35;
     const drumMat = new THREE.MeshStandardMaterial({
-      color: drumColor,
+      color: activeVariant === 'aqsa' ? 0x1b3a73 : 0x254f35,
       roughness: 0.55,
       metalness: 0.1,
+      side: THREE.DoubleSide,
     });
 
-    const spireColor = activeVariant === 'aqsa' ? 0x1d3f80 : 0x2f6342;
     const spireMat = new THREE.MeshStandardMaterial({
-      color: spireColor,
+      color: activeVariant === 'aqsa' ? 0x1d3f80 : 0x2f6342,
       roughness: 0.48,
       metalness: 0.14,
     });
@@ -516,38 +397,11 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
       metalness: 0.65,
     });
 
-    const allSolidMeshes: THREE.Mesh[] = [];
-    const allWireLines: THREE.LineSegments[] = [];
-
-    const addTrackedMesh = (mesh: THREE.Mesh, parent: THREE.Object3D) => {
-      parent.add(mesh);
-      allSolidMeshes.push(mesh);
-
-      const edges = new THREE.EdgesGeometry(mesh.geometry, 22);
-      const line = new THREE.LineSegments(
-        edges,
-        new THREE.LineBasicMaterial({
-          color: 0x56f2c6,
-          transparent: true,
-          opacity: 0,
-        })
-      );
-      mesh.add(line);
-      allWireLines.push(line);
-    };
-
-    const makePanel = (
-      width: number,
-      height: number,
-      depth: number,
-      outerMaterial: THREE.Material
-    ) => {
+    const makePanel = (width: number, height: number, depth: number, outerMat: THREE.Material) => {
       const geo = new THREE.BoxGeometry(width, height, depth);
-      const mats = [kraftMat, kraftMat, kraftMat, kraftMat, outerMaterial, kraftMat];
-      return new THREE.Mesh(geo, mats);
+      return new THREE.Mesh(geo, [kraftMat, kraftMat, kraftMat, kraftMat, outerMat, kraftMat]);
     };
 
-    // 1. FRONT WALK-IN ARCHED WALL
     const frontHinge = new THREE.Group();
     frontHinge.position.set(0, 0, W / 2);
     masjidRoot.add(frontHinge);
@@ -569,52 +423,39 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
     doorHole.closePath();
     frontShape.holes.push(doorHole);
 
-    const frontGeo = new THREE.ExtrudeGeometry(frontShape, {
-      depth: T,
-      bevelEnabled: false,
-    });
+    const frontGeo = new THREE.ExtrudeGeometry(frontShape, { depth: T, bevelEnabled: false });
     const posAttr = frontGeo.attributes.position;
     const uvAttr = frontGeo.attributes.uv;
     for (let i = 0; i < posAttr.count; i++) {
-      const vx = posAttr.getX(i);
-      const vy = posAttr.getY(i);
-      uvAttr.setXY(i, (vx + W / 2) / W, vy / H);
+      uvAttr.setXY(i, (posAttr.getX(i) + W / 2) / W, posAttr.getY(i) / H);
     }
     frontGeo.translate(0, 0, -T);
-    const frontMesh = new THREE.Mesh(frontGeo, [frontMat, kraftMat]);
-    addTrackedMesh(frontMesh, frontHinge);
+    frontHinge.add(new THREE.Mesh(frontGeo, [frontMat, kraftMat]));
 
-    // 2. BACK WALL
     const backHinge = new THREE.Group();
     backHinge.position.set(0, 0, -W / 2);
     backHinge.rotation.y = Math.PI;
     masjidRoot.add(backHinge);
-
     const backPanel = makePanel(W, H, T, sideMat);
     backPanel.position.set(0, H / 2, -T / 2);
-    addTrackedMesh(backPanel, backHinge);
+    backHinge.add(backPanel);
 
-    // 3. LEFT WALL
     const leftHinge = new THREE.Group();
     leftHinge.position.set(-W / 2, 0, 0);
     leftHinge.rotation.y = -Math.PI / 2;
     masjidRoot.add(leftHinge);
-
     const leftPanel = makePanel(W, H, T, sideMat);
     leftPanel.position.set(0, H / 2, -T / 2);
-    addTrackedMesh(leftPanel, leftHinge);
+    leftHinge.add(leftPanel);
 
-    // 4. RIGHT WALL
     const rightHinge = new THREE.Group();
     rightHinge.position.set(W / 2, 0, 0);
     rightHinge.rotation.y = Math.PI / 2;
     masjidRoot.add(rightHinge);
-
     const rightPanel = makePanel(W, H, T, sideMat);
     rightPanel.position.set(0, H / 2, -T / 2);
-    addTrackedMesh(rightPanel, rightHinge);
+    rightHinge.add(rightPanel);
 
-    // 5. ROOF DECK WITH CIRCULAR HOLLOW DOME OPENING
     const roofGroup = new THREE.Group();
     roofGroup.position.set(0, H, 0);
     masjidRoot.add(roofGroup);
@@ -625,110 +466,74 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
     roofShape.lineTo(W / 2, W / 2);
     roofShape.lineTo(-W / 2, W / 2);
     roofShape.closePath();
-
     const domeOpening = new THREE.Path();
     domeOpening.absarc(0, 0, 0.39, 0, Math.PI * 2, false);
     roofShape.holes.push(domeOpening);
 
-    const roofGeo = new THREE.ExtrudeGeometry(roofShape, {
-      depth: T,
-      bevelEnabled: false,
-    });
+    const roofGeo = new THREE.ExtrudeGeometry(roofShape, { depth: T, bevelEnabled: false });
     roofGeo.rotateX(-Math.PI / 2);
-    const roofMesh = new THREE.Mesh(roofGeo, kraftMat);
-    addTrackedMesh(roofMesh, roofGroup);
+    roofGroup.add(new THREE.Mesh(roofGeo, kraftMat));
 
-    for (const [tx, tz] of [
-      [-0.55, W / 2 - 0.04],
-      [0.55, W / 2 - 0.04],
-      [-0.55, -W / 2 + 0.04],
-      [0.55, -W / 2 + 0.04],
-    ]) {
-      const tab = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.03), kraftMat);
-      tab.position.set(tx, -0.03, tz);
-      addTrackedMesh(tab, roofGroup);
-    }
-
-    // 6. FOUR CORNER MINARETS
     const minaretsGroup = new THREE.Group();
     masjidRoot.add(minaretsGroup);
-
-    const cornerCoords = [
+    [
       [-W / 2 + 0.09, W / 2 - 0.09],
       [W / 2 - 0.09, W / 2 - 0.09],
       [-W / 2 + 0.09, -W / 2 + 0.09],
       [W / 2 - 0.09, -W / 2 + 0.09],
-    ];
-
-    cornerCoords.forEach(([cx, cz]) => {
+    ].forEach(([cx, cz]) => {
       const mTower = new THREE.Group();
       mTower.position.set(cx, 0, cz);
       minaretsGroup.add(mTower);
 
       const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.24, 1.36, 0.24), sideMat);
       shaft.position.y = 0.68;
-      addTrackedMesh(shaft, mTower);
+      mTower.add(shaft);
 
       const balcony = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.32), kraftMat);
       balcony.position.y = 1.38;
-      addTrackedMesh(balcony, mTower);
+      mTower.add(balcony);
 
-      const lanternBox = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.16, 0.20), drumMat);
-      lanternBox.position.y = 1.50;
-      addTrackedMesh(lanternBox, mTower);
+      const lanternBox = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.16, 0.2), drumMat);
+      lanternBox.position.y = 1.5;
+      mTower.add(lanternBox);
 
       const spire = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.28, 4), spireMat);
       spire.rotation.y = Math.PI / 4;
       spire.position.y = 1.72;
-      addTrackedMesh(spire, mTower);
+      mTower.add(spire);
     });
 
-    // 7. CENTRAL OCTAGONAL HOLLOW DOME + GOLDEN CRESCENT FINIAL
     const domeGroup = new THREE.Group();
     domeGroup.position.set(0, H + T, 0);
     masjidRoot.add(domeGroup);
 
-    const drumGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.20, 8, 1, true);
-    const drumSideMat = drumMat.clone();
-    drumSideMat.side = THREE.DoubleSide;
-    const drumMesh = new THREE.Mesh(drumGeo, drumSideMat);
-    drumMesh.position.y = 0.10;
-    addTrackedMesh(drumMesh, domeGroup);
+    const drumMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.42, 0.42, 0.2, 8, 1, true),
+      drumMat
+    );
+    drumMesh.position.y = 0.1;
+    domeGroup.add(drumMesh);
 
-    const crownGeo = new THREE.SphereGeometry(0.42, 8, 5, 0, Math.PI * 2, 0, Math.PI / 2);
-    const crownSideMat = domeMat.clone();
-    crownSideMat.side = THREE.DoubleSide;
-    const crownMesh = new THREE.Mesh(crownGeo, crownSideMat);
-    crownMesh.position.y = 0.20;
+    const crownMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.42, 8, 5, 0, Math.PI * 2, 0, Math.PI / 2),
+      domeMat
+    );
+    crownMesh.position.y = 0.2;
     crownMesh.scale.set(1, 0.78, 1);
-    addTrackedMesh(crownMesh, domeGroup);
+    domeGroup.add(crownMesh);
 
     const finialStem = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.022, 0.15, 12), goldMat);
     finialStem.position.y = 0.58;
-    addTrackedMesh(finialStem, domeGroup);
+    domeGroup.add(finialStem);
 
     const crescentOuter = new THREE.Mesh(
       new THREE.TorusGeometry(0.065, 0.015, 12, 28, Math.PI * 1.45),
       goldMat
     );
-    crescentOuter.position.y = 0.70;
+    crescentOuter.position.y = 0.7;
     crescentOuter.rotation.z = Math.PI * 0.78;
-    addTrackedMesh(crescentOuter, domeGroup);
-
-    const holoFaceMat = new THREE.MeshPhysicalMaterial({
-      color: activeVariant === 'aqsa' ? 0x1098ad : 0x20c997,
-      emissive: activeVariant === 'aqsa' ? 0x0b4f6c : 0x0f5132,
-      emissiveIntensity: 0.65,
-      roughness: 0.2,
-      metalness: 0.1,
-      transparent: true,
-      opacity: 0.24,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-    });
-
-    const originalMaterials = new Map<THREE.Mesh, THREE.Material | THREE.Material[]>();
-    allSolidMeshes.forEach((m) => originalMaterials.set(m, m.material));
+    domeGroup.add(crescentOuter);
 
     const clock = new THREE.Clock();
     let frameId: number;
@@ -736,7 +541,6 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
     const animate = () => {
       frameId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
-
       const p = THREE.MathUtils.clamp(assemblyRef.current / 100, 0, 1);
 
       const wallProgress = THREE.MathUtils.smoothstep(p, 0.0, 0.45);
@@ -751,82 +555,30 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
       roofGroup.scale.setScalar(0.3 + 0.7 * roofProgress);
       roofGroup.visible = p > 0.25;
 
-      const minProgress = THREE.MathUtils.smoothstep(p, 0.60, 0.86);
+      const minProgress = THREE.MathUtils.smoothstep(p, 0.6, 0.86);
       minaretsGroup.position.y = (1 - minProgress) * 1.15;
       minaretsGroup.scale.set(1, Math.max(0.01, minProgress), 1);
       minaretsGroup.visible = p > 0.52;
 
-      const domeProgress = THREE.MathUtils.smoothstep(p, 0.80, 1.0);
+      const domeProgress = THREE.MathUtils.smoothstep(p, 0.8, 1.0);
       domeGroup.position.y = H + T + (1 - domeProgress) * 0.95;
       domeGroup.scale.setScalar(Math.max(0.01, domeProgress));
       domeGroup.visible = p > 0.74;
 
-      const currentMode = modeRef.current;
-
-      if (currentMode === 'hologram') {
-        scene.background = new THREE.Color(0x0b1a22);
-        ambientLight.intensity = 0.9;
-        keyLight.intensity = 1.1;
-        interiorLanternLight.intensity = 1.2 + Math.sin(elapsed * 3) * 0.25;
-        interiorLanternLight.color.setHex(0x38f2c2);
-        lanternOrb.visible = false;
-
-        allSolidMeshes.forEach((m) => {
-          m.material = holoFaceMat;
-        });
-        allWireLines.forEach((l) => {
-          const mat = l.material as THREE.LineBasicMaterial;
-          mat.opacity = 0.88;
-          mat.color.setHex(activeVariant === 'aqsa' ? 0x56f2c6 : 0x74f7a8);
-        });
-
-        const scanY = ((elapsed * 0.65) % 1) * 2.05;
-        scanPlane.position.y = scanY;
-        (scanPlane.material as THREE.MeshBasicMaterial).opacity = 0.35;
-        outerRing.rotation.z = elapsed * 0.25;
-      } else if (currentMode === 'ramadan') {
+      if (modeRef.current === 'ramadan') {
         scene.background = new THREE.Color(0x161d29);
-        ambientLight.intensity = 0.48;
-        keyLight.intensity = 0.6;
+        ambientLight.intensity = 0.5;
+        keyLight.intensity = 0.65;
         interiorLanternLight.color.setHex(0xff9924);
-        interiorLanternLight.intensity = 4.6 + Math.sin(elapsed * 7.5) * 0.35;
+        interiorLanternLight.intensity = 4.6 + Math.sin(elapsed * 7) * 0.35;
         lanternOrb.visible = p > 0.35;
-
-        allSolidMeshes.forEach((m) => {
-          const orig = originalMaterials.get(m);
-          if (orig) m.material = orig;
-        });
-        allWireLines.forEach((l) => {
-          (l.material as THREE.LineBasicMaterial).opacity = 0;
-        });
-        (scanPlane.material as THREE.MeshBasicMaterial).opacity = 0;
       } else {
-        // Warm Unified Cream Studio (#F7F3E9) matching the rest of the website!
         scene.background = new THREE.Color(0xf7f3e9);
-        ambientLight.intensity = 1.48;
+        ambientLight.intensity = 1.5;
         keyLight.intensity = 1.95;
         interiorLanternLight.intensity = 0.95;
         interiorLanternLight.color.setHex(0xffe0a3);
         lanternOrb.visible = false;
-
-        allSolidMeshes.forEach((m) => {
-          const orig = originalMaterials.get(m);
-          if (orig) m.material = orig;
-        });
-        allWireLines.forEach((l) => {
-          (l.material as THREE.LineBasicMaterial).opacity = 0;
-        });
-        (scanPlane.material as THREE.MeshBasicMaterial).opacity = 0;
-      }
-
-      floorGroup.visible = camera.position.y >= 0.08;
-
-      if (cameraTargetPresetRef.current.active) {
-        camera.position.lerp(cameraTargetPresetRef.current.pos, 0.08);
-        controls.target.lerp(cameraTargetPresetRef.current.target, 0.08);
-        if (camera.position.distanceTo(cameraTargetPresetRef.current.pos) < 0.03) {
-          cameraTargetPresetRef.current.active = false;
-        }
       }
 
       controls.update();
@@ -846,7 +598,6 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
     return () => {
       cancelAnimationFrame(frameId);
       window.removeEventListener('resize', handleResize);
-      controls.removeEventListener('start', stopPresetOnInteract);
       controls.dispose();
       renderer.dispose();
       frontTex.dispose();
@@ -855,268 +606,100 @@ export const InteractiveMasjid3DAtelier: React.FC<Props> = ({
     };
   }, [activeVariant]);
 
-  const isDarkStage = visualMode === 'hologram' || visualMode === 'ramadan';
-
   return (
-    <section id="atelier-3d" className="bg-sand-100 py-16 sm:py-24">
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-        {/* Top Section Header — Unified Warm Cream Palette */}
-        <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-aqsa-500/25 bg-aqsa-50 px-3.5 py-1.5 font-mono text-[11.5px] font-bold uppercase tracking-[0.14em] text-aqsa-600">
-              <Rotate3d className="h-3.5 w-3.5 text-aqsa-500" />
-              <span>Interactive 3D Hold-In-Hand Studio</span>
-            </div>
-
-            <h2 className="mt-4 font-display text-3xl font-medium tracking-tight text-olive-800 sm:text-5xl">
-              Hold MiniMasjid® in 3D — spin 360°, peek underneath &amp; watch it unfold.
+    <section id="atelier-3d" className="bg-sand-100 py-12 sm:py-20">
+      <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <h2 className="font-display text-3xl font-medium text-olive-800 sm:text-4xl">
+              Explore in 3D
             </h2>
-
-            <p className="mt-3.5 text-[16px] leading-relaxed text-olive-800/80 sm:text-[17px]">
-              Drag in any direction to inspect our patented <strong>120 × 120 × 145 cm</strong> walk-in
-              playhouse — flip underneath to see right up inside the vaulted dome, toggle{' '}
-              <strong>3D Hologram</strong> or <strong>Ramadan Glow</strong>, or slide the bar to fold
-              it from flat sheets.
+            <p className="mt-1 text-[15px] text-olive-800/80">
+              Drag to spin 360° or watch it unfold from flat sheets.
             </p>
           </div>
 
-          {/* Live Edition Switcher Pills */}
-          <div className="inline-flex self-start rounded-2xl border border-sand-300 bg-white p-1.5 shadow-sm">
+          <div className="inline-flex self-start rounded-full border border-sand-300 bg-white p-1">
             <button
               type="button"
               onClick={() => onVariantChange('aqsa')}
-              className={`rounded-xl px-4 py-2.5 text-[13.5px] font-bold transition-all ${
+              className={`rounded-full px-4 py-2 text-[13px] font-bold transition-all ${
                 activeVariant === 'aqsa'
-                  ? 'bg-aqsa-500 text-white shadow-sm'
-                  : 'text-olive-700 hover:text-olive-900'
+                  ? 'bg-aqsa-500 text-white'
+                  : 'text-olive-800 hover:bg-sand-100'
               }`}
             >
-              Al-Aqsa XL (Golden Dome)
+              Al-Aqsa XL
             </button>
             <button
               type="button"
               onClick={() => onVariantChange('nabawi')}
-              className={`rounded-xl px-4 py-2.5 text-[13.5px] font-bold transition-all ${
+              className={`rounded-full px-4 py-2 text-[13px] font-bold transition-all ${
                 activeVariant === 'nabawi'
-                  ? 'bg-olive-500 text-white shadow-sm'
-                  : 'text-olive-700 hover:text-olive-900'
+                  ? 'bg-olive-500 text-white'
+                  : 'text-olive-800 hover:bg-sand-100'
               }`}
             >
-              Masjid an-Nabawi XL (Green Dome)
+              Nabawi XL
             </button>
           </div>
         </div>
 
-        {/* Main 3D Stage Card — Crisp White Frame on Unified Cream Background */}
-        <div className="mt-9 grid gap-6 lg:grid-cols-12">
-          {/* Left 8 Columns: Interactive WebGL Viewport */}
-          <div className="relative overflow-hidden rounded-[2rem] border border-sand-300 bg-white p-2.5 shadow-plush-lg lg:col-span-8">
-            <div className="relative overflow-hidden rounded-[1.5rem] border border-sand-200">
-              {/* Top Floating Telemetry HUD */}
-              <div className="pointer-events-none absolute inset-x-4 top-4 z-10 flex flex-wrap items-center justify-between gap-2">
-                <div
-                  className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-[11.5px] font-semibold backdrop-blur-md ${
-                    isDarkStage
-                      ? 'border-emerald-400/30 bg-black/55 text-emerald-300'
-                      : 'border-sand-300 bg-white/90 text-olive-800'
-                  }`}
-                >
-                  <span className="h-2 w-2 rounded-full bg-olive-500" />
-                  <span>
-                    {activeVariant === 'aqsa' ? 'AL-AQSA XL' : 'NABAWI XL'} · 120×120×145 CM
-                  </span>
-                </div>
+        {/* Clean Full-Width 3D Canvas Card */}
+        <div className="mt-6 overflow-hidden rounded-[2rem] border border-sand-300 bg-white p-3 shadow-plush">
+          <div className="relative overflow-hidden rounded-[1.5rem]">
+            <div
+              ref={mountRef}
+              className="h-[380px] w-full cursor-grab active:cursor-grabbing sm:h-[470px]"
+            />
 
-                <div
-                  className={`rounded-full border px-3.5 py-1.5 font-mono text-[11.5px] backdrop-blur-md ${
-                    isDarkStage
-                      ? 'border-white/15 bg-black/55 text-sand-200'
-                      : 'border-sand-300 bg-white/90 text-olive-700'
-                  }`}
-                >
-                  Drag to rotate 360° · Pinch/Scroll to zoom
-                </div>
-              </div>
-
-              {/* WebGL Mount Canvas */}
-              <div
-                ref={mountRef}
-                className="h-[420px] w-full cursor-grab active:cursor-grabbing sm:h-[520px]"
-              />
-
-              {/* Bottom Floating Camera Angle Bar */}
-              <div className="absolute inset-x-3 bottom-3 z-10 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-sand-300/80 bg-white/92 px-3 py-2.5 shadow-sm backdrop-blur-md sm:inset-x-5 sm:justify-between">
-                <span className="hidden font-mono text-[11px] font-bold uppercase tracking-wider text-olive-700 sm:inline">
-                  Quick Angles:
-                </span>
-                <div className="flex flex-wrap justify-center gap-1.5">
-                  {[
-                    { id: 'orbit', label: '360° Hold View' },
-                    { id: 'underneath', label: 'Flip Underneath (Inside Dome)' },
-                    { id: 'doorway', label: 'Child Walk-In Arch' },
-                    { id: 'top', label: 'Top View' },
-                  ].map((cam) => (
-                    <button
-                      key={cam.id}
-                      type="button"
-                      onClick={() =>
-                        applyCameraPreset(cam.id as 'orbit' | 'underneath' | 'doorway' | 'top')
-                      }
-                      className={`rounded-full px-3 py-1.5 text-[12px] font-bold transition-all ${
-                        cameraPreset === cam.id
-                          ? 'bg-olive-500 text-white'
-                          : 'bg-sand-100 text-olive-800 hover:bg-sand-200'
-                      }`}
-                    >
-                      {cam.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1.5 text-[12px] font-bold text-olive-800 shadow-sm backdrop-blur-md">
+              <Rotate3d className="h-3.5 w-3.5 text-olive-600" />
+              <span>Drag to rotate</span>
             </div>
           </div>
 
-          {/* Right 4 Columns: Clean White Studio Control Card */}
-          <div className="flex flex-col justify-between gap-5 rounded-[2rem] border border-sand-300 bg-white p-6 shadow-plush sm:p-7 lg:col-span-4">
-            <div className="space-y-6">
-              {/* 1. Render Mode Switcher */}
-              <div>
-                <p className="font-mono text-[11.5px] font-bold uppercase tracking-[0.14em] text-olive-600">
-                  1 · Choose View Mode
-                </p>
-                <div className="mt-3 grid grid-cols-1 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setVisualMode('studio')}
-                    className={`flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-all ${
-                      visualMode === 'studio'
-                        ? 'border-olive-500 bg-olive-50 text-olive-900 ring-2 ring-olive-500/15'
-                        : 'border-sand-300 bg-sand-50/70 text-olive-800 hover:border-olive-500/40'
-                    }`}
-                  >
-                    <Sun className="h-5 w-5 shrink-0 text-dome-500" />
-                    <div>
-                      <p className="text-[14px] font-bold">Daylight Living-Room View</p>
-                      <p className="text-[12px] text-olive-700/80">
-                        True printed tilework &amp; natural kraft board
-                      </p>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setVisualMode('ramadan')}
-                    className={`flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-all ${
-                      visualMode === 'ramadan'
-                        ? 'border-dome-500 bg-dome-50 text-olive-900 ring-2 ring-dome-500/20'
-                        : 'border-sand-300 bg-sand-50/70 text-olive-800 hover:border-dome-500/40'
-                    }`}
-                  >
-                    <Flame className="h-5 w-5 shrink-0 text-clay-500" />
-                    <div>
-                      <p className="text-[14px] font-bold">Ramadan Lantern Glow</p>
-                      <p className="text-[12px] text-olive-700/80">
-                        Warm golden lantern light shining inside
-                      </p>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setVisualMode('hologram')}
-                    className={`flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-all ${
-                      visualMode === 'hologram'
-                        ? 'border-aqsa-500 bg-aqsa-50 text-aqsa-700 ring-2 ring-aqsa-500/15'
-                        : 'border-sand-300 bg-sand-50/70 text-olive-800 hover:border-aqsa-500/40'
-                    }`}
-                  >
-                    <Sparkles className="h-5 w-5 shrink-0 text-aqsa-500" />
-                    <div>
-                      <p className="text-[14px] font-bold">3D Blueprint Hologram</p>
-                      <p className="text-[12px] text-olive-700/80">
-                        X-ray wireframe &amp; interlocking structure
-                      </p>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* 2. Interactive Fold-From-Flat Assembly Scrubber */}
-              <div className="rounded-2xl border border-sand-300 bg-sand-100/80 p-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[11.5px] font-bold uppercase tracking-[0.12em] text-olive-700">
-                    2 · 3D Unfold &amp; Build
-                  </span>
-                  <span className="font-mono text-[13px] font-bold text-aqsa-600">
-                    {Math.round(assemblyPct)}% Built
-                  </span>
-                </div>
-
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={assemblyPct}
-                  onChange={(e) => {
-                    setIsAutoBuilding(false);
-                    setAssemblyPct(Number(e.target.value));
-                  }}
-                  aria-label="3D Assembly Unfold Progress"
-                  className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-sand-300 accent-olive-500"
-                />
-
-                <div className="mt-2 flex justify-between font-mono text-[10.5px] font-semibold text-olive-700/80">
-                  <span>0% Flat Behind Sofa</span>
-                  <span>50% Walls Slot</span>
-                  <span>100% Dome On</span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    isAutoBuilding ? setIsAutoBuilding(false) : triggerAutoBuild()
-                  }
-                  className="mt-3.5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-aqsa-500/30 bg-white px-4 py-2.5 text-[13px] font-bold text-aqsa-600 transition-colors hover:bg-aqsa-50"
-                >
-                  {isAutoBuilding ? (
-                    <>
-                      <Pause className="h-4 w-4" />
-                      <span>Pause Self-Assembly</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-4 w-4" />
-                      <span>Watch It Build From Flat Sheets</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Bottom Spec Callout + Jump to Order */}
-            <div className="border-t border-sand-200 pt-5">
-              <div className="grid grid-cols-2 gap-2.5 text-[12.5px] font-semibold text-olive-800">
-                <div className="flex items-center gap-2 rounded-xl bg-sand-100 px-3 py-2">
-                  <Box className="h-4 w-4 text-dome-500" />
-                  <span>Open Walk-In Floor</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-xl bg-sand-100 px-3 py-2">
-                  <Layers className="h-4 w-4 text-olive-500" />
-                  <span>Zero Tools Needed</span>
-                </div>
-              </div>
+          {/* Minimal Bottom Control Strip */}
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 px-1">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setVisualMode('studio')}
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-bold transition-all ${
+                  visualMode === 'studio'
+                    ? 'bg-olive-500 text-white'
+                    : 'bg-sand-100 text-olive-800 hover:bg-sand-200'
+                }`}
+              >
+                <Sun className="h-3.5 w-3.5" />
+                <span>Daylight</span>
+              </button>
 
               <button
                 type="button"
-                onClick={() => onSelectForPurchase(activeVariant)}
-                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-olive-500 px-6 py-3.5 text-[14.5px] font-bold text-white transition-all hover:bg-olive-600"
+                onClick={() => setVisualMode('ramadan')}
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-bold transition-all ${
+                  visualMode === 'ramadan'
+                    ? 'bg-dome-500 text-white'
+                    : 'bg-sand-100 text-olive-800 hover:bg-sand-200'
+                }`}
               >
-                <Eye className="h-4 w-4 text-dome-100" />
-                <span>
-                  Order {activeVariant === 'aqsa' ? 'Al-Aqsa XL' : 'Nabawi XL'} Edition
-                </span>
+                <Flame className="h-3.5 w-3.5" />
+                <span>Lantern Glow</span>
               </button>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setAssemblyPct(0);
+                setIsAutoBuilding(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-sand-300 bg-sand-50 px-4 py-2 text-[13px] font-bold text-olive-800 hover:bg-sand-100"
+            >
+              <Play className="h-3.5 w-3.5 text-olive-600" />
+              <span>Watch 3D Unfold</span>
+            </button>
           </div>
         </div>
       </div>

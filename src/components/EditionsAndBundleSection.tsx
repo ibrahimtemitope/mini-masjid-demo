@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Check,
-  Gift,
-  Heart,
-  Rotate3d,
-  ShieldCheck,
-  ShoppingBag,
-  Truck,
-} from 'lucide-react';
+import { Rotate3d, ShoppingBag } from 'lucide-react';
 import {
   BUNDLE_TIERS,
   CurrencyCode,
@@ -20,320 +12,172 @@ import { MasjidVariant } from './InteractiveMasjid3DAtelier';
 
 interface Props {
   currency: CurrencyCode;
-  selectedEditionId: EditionId;
-  onSelectEdition: (id: EditionId) => void;
   onInspectIn3D: (variant: MasjidVariant) => void;
-  onAddToBag: (edition: ProductEdition, qty: 1 | 2 | 3, giftNote: string) => void;
+  onAddToBag: (edition: ProductEdition, qty: 1 | 2 | 3) => void;
 }
 
 export const EditionsAndBundleSection: React.FC<Props> = ({
   currency,
-  selectedEditionId,
-  onSelectEdition,
   onInspectIn3D,
   onAddToBag,
 }) => {
-  const [bundleQty, setBundleQty] = useState<1 | 2 | 3>(2);
-  const [includeGiftCard, setIncludeGiftCard] = useState<boolean>(false);
-  const [giftNote, setGiftNote] = useState<string>('');
+  const [qtyByEdition, setQtyByEdition] = useState<Record<EditionId, 1 | 2 | 3>>({
+    'aqsa-xl': 1,
+    'nabawi-xl': 1,
+    'aqsa-mini': 1,
+  });
 
-  const activeEdition =
-    PRODUCT_EDITIONS.find((e) => e.id === selectedEditionId) || PRODUCT_EDITIONS[0];
-  const activeBundle = BUNDLE_TIERS.find((b) => b.qty === bundleQty) || BUNDLE_TIERS[0];
-
-  const rawTotalDkk = activeEdition.priceDkk * bundleQty;
-  const discountedTotalDkk = Math.round(rawTotalDkk * (1 - activeBundle.discountPct));
-  const givebackDkk = Math.round(discountedTotalDkk * 0.075);
-
-  const getBadgeClasses = (tone: 'aqsa' | 'olive' | 'dome') => {
-    if (tone === 'aqsa') return 'bg-aqsa-50 text-aqsa-600 border border-aqsa-500/20';
-    if (tone === 'dome') return 'bg-dome-50 text-dome-600 border border-dome-400/35';
-    return 'bg-olive-50 text-olive-700 border border-olive-500/25';
-  };
+  const [altPhotoOpen, setAltPhotoOpen] = useState<Record<EditionId, boolean>>({
+    'aqsa-xl': false,
+    'nabawi-xl': false,
+    'aqsa-mini': false,
+  });
 
   return (
-    <section id="editions" className="bg-sand-100 py-16 sm:py-24">
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-        {/* Part 1: All 3 Real Editions Pedestal Showcase */}
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-[12.5px] font-bold uppercase tracking-[0.16em] text-olive-600">
-            Explore Our Complete Collection
-          </p>
-          <h2 className="mt-3 font-display text-3xl font-medium text-olive-800 sm:text-5xl">
-            Three Patented Editions, Crafted in Exclusive Batches
+    <section id="editions" className="bg-sand-100 py-12 sm:py-20">
+      <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
+          <h2 className="font-display text-3xl font-medium text-olive-800 sm:text-4xl">
+            Choose Your MiniMasjid
           </h2>
-          <p className="mt-4 text-[16.5px] leading-relaxed text-olive-800/80">
-            Choose between our two full-size <strong>145 cm Walk-In XL Sanctuaries</strong> or our
-            compact <strong>Mini Edition</strong> for Ramadan corners and thoughtful gifting.
+          <p className="text-[14.5px] font-semibold text-olive-700/85">
+            Free shipping included · Save up to 17% on 2–3 packs
           </p>
         </div>
 
-        {/* 3 Pedestal Cards */}
-        <div className="mt-12 grid gap-7 lg:grid-cols-3">
+        {/* 3 Giant Image-First Product Cards */}
+        <div className="mt-8 grid gap-7 lg:grid-cols-3">
           {PRODUCT_EDITIONS.map((edition) => {
-            const isSelected = edition.id === selectedEditionId;
+            const qty = qtyByEdition[edition.id];
+            const tier = BUNDLE_TIERS.find((b) => b.qty === qty) || BUNDLE_TIERS[0];
+            const rawPrice = edition.priceDkk * qty;
+            const finalPrice = Math.round(rawPrice * (1 - tier.discountPct));
+            const showAlt = altPhotoOpen[edition.id];
 
             return (
-              <div
+              <article
                 key={edition.id}
-                className={`group flex flex-col justify-between rounded-[2rem] border bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 sm:p-7 ${
-                  isSelected
-                    ? 'border-olive-500 shadow-plush-lg ring-2 ring-olive-500/20'
-                    : 'border-sand-300 shadow-plush hover:border-olive-500/50'
-                }`}
+                className="flex flex-col justify-between overflow-hidden rounded-[2rem] border border-sand-300 bg-white p-3.5 shadow-plush sm:p-4"
               >
                 <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`rounded-full px-3.5 py-1 text-[12px] font-bold ${getBadgeClasses(
-                        edition.badgeTone
-                      )}`}
-                    >
-                      {edition.badge}
-                    </span>
-                    <span className="font-mono text-[12px] font-semibold text-olive-600">
-                      {edition.ageRange}
-                    </span>
-                  </div>
-
-                  {/* Clean Studio Photo Pedestal */}
-                  <div className="relative mt-5 overflow-hidden rounded-2xl bg-sand-100">
+                  {/* HUGE Product Image Frame */}
+                  <div className="relative overflow-hidden rounded-[1.5rem] bg-sand-100">
                     <img
-                      src={edition.primaryImage}
+                      src={showAlt ? edition.secondaryImage : edition.primaryImage}
                       alt={edition.name}
-                      className="aspect-[4/3.8] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onClick={() =>
+                        setAltPhotoOpen((prev) => ({
+                          ...prev,
+                          [edition.id]: !prev[edition.id],
+                        }))
+                      }
+                      className="aspect-[4/4.4] w-full cursor-pointer object-cover transition-transform duration-500 hover:scale-[1.03]"
                     />
-                    {edition.isWalkIn && (
-                      <button
-                        type="button"
-                        onClick={() => onInspectIn3D(edition.threeModelVariant)}
-                        className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-aqsa-500/25 bg-white/95 px-3 py-1.5 text-[11.5px] font-bold text-aqsa-600 shadow-sm backdrop-blur-md hover:bg-aqsa-50"
-                      >
-                        <Rotate3d className="h-3.5 w-3.5 text-aqsa-500" />
-                        <span>View in 3D</span>
-                      </button>
-                    )}
+
+                    {/* Top Tag */}
+                    <span className="absolute left-3.5 top-3.5 rounded-full bg-white/95 px-3 py-1 text-[12px] font-bold text-olive-800 shadow-sm backdrop-blur-md">
+                      {edition.tag}
+                    </span>
+
+                    {/* Quick 2-Photo Toggle Dots + 3D Button */}
+                    <div className="absolute inset-x-3.5 bottom-3.5 flex items-center justify-between">
+                      <div className="inline-flex gap-1.5 rounded-full bg-white/90 px-2.5 py-1.5 shadow-sm backdrop-blur-md">
+                        <button
+                          type="button"
+                          aria-label="Photo 1"
+                          onClick={() =>
+                            setAltPhotoOpen((prev) => ({ ...prev, [edition.id]: false }))
+                          }
+                          className={`h-2.5 w-2.5 rounded-full transition-all ${
+                            !showAlt ? 'w-5 bg-olive-600' : 'bg-olive-800/30'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          aria-label="Photo 2"
+                          onClick={() =>
+                            setAltPhotoOpen((prev) => ({ ...prev, [edition.id]: true }))
+                          }
+                          className={`h-2.5 w-2.5 rounded-full transition-all ${
+                            showAlt ? 'w-5 bg-olive-600' : 'bg-olive-800/30'
+                          }`}
+                        />
+                      </div>
+
+                      {edition.isWalkIn && (
+                        <button
+                          type="button"
+                          onClick={() => onInspectIn3D(edition.threeModelVariant)}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[12px] font-bold text-aqsa-600 shadow-sm backdrop-blur-md hover:bg-aqsa-50"
+                        >
+                          <Rotate3d className="h-3.5 w-3.5 text-aqsa-500" />
+                          <span>3D</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="mt-5 flex items-baseline justify-between gap-2">
-                    <h3 className="font-display text-xl font-semibold text-olive-800">
-                      {edition.name}
-                    </h3>
+                  {/* Minimal Title + Price + 1-Line Spec */}
+                  <div className="mt-4 px-1.5">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <h3 className="font-display text-[1.35rem] font-semibold text-olive-800">
+                        {edition.name}
+                      </h3>
+                      <div className="text-right">
+                        <span className="font-display text-[1.4rem] font-bold text-olive-800">
+                          {formatPrice(finalPrice, currency)}
+                        </span>
+                        {tier.discountPct > 0 && (
+                          <span className="ml-1.5 text-[12.5px] text-olive-600/70 line-through">
+                            {formatPrice(rawPrice, currency)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="mt-1 text-[14px] text-olive-700/80">{edition.oneLiner}</p>
                   </div>
-
-                  <p className="mt-1 font-display text-2xl font-bold text-olive-700">
-                    {formatPrice(edition.priceDkk, currency)}
-                  </p>
-
-                  <p className="mt-2.5 text-[14.5px] leading-relaxed text-olive-800/80">
-                    {edition.subtitle}
-                  </p>
-
-                  <div className="my-4 h-px bg-sand-200" />
-
-                  <ul className="space-y-2 text-[13.5px] text-olive-800">
-                    {edition.highlights.slice(0, 3).map((hl, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-olive-500" />
-                        <span>{hl}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
 
-                <a
-                  href="#bundle-builder"
-                  onClick={() => onSelectEdition(edition.id)}
-                  className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-5 py-3.5 text-[14.5px] font-bold transition-colors ${
-                    isSelected
-                      ? 'bg-olive-500 text-white hover:bg-olive-600'
-                      : 'border border-sand-300 bg-sand-100 text-olive-800 hover:bg-sand-200'
-                  }`}
-                >
-                  {isSelected ? 'Selected in Configurator ↓' : `Select ${edition.shortName}`}
-                </a>
-              </div>
+                {/* Simple 1x / 2x / 3x Selector + Direct Add to Bag */}
+                <div className="mt-4 px-1.5 pb-1">
+                  <div className="grid grid-cols-3 gap-1.5 rounded-2xl bg-sand-100 p-1">
+                    {BUNDLE_TIERS.map((b) => {
+                      const active = qty === b.qty;
+                      return (
+                        <button
+                          key={b.qty}
+                          type="button"
+                          onClick={() =>
+                            setQtyByEdition((prev) => ({ ...prev, [edition.id]: b.qty }))
+                          }
+                          className={`rounded-xl py-2 text-[12.5px] font-bold transition-all ${
+                            active
+                              ? 'bg-white text-olive-900 shadow-sm'
+                              : 'text-olive-700 hover:text-olive-900'
+                          }`}
+                        >
+                          <span>{b.label}</span>
+                          {b.badge && (
+                            <span className="ml-1 text-[11px] text-clay-600">{b.badge}</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => onAddToBag(edition, qty)}
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-olive-500 px-5 py-3.5 text-[14.5px] font-bold text-white transition-colors hover:bg-olive-600"
+                  >
+                    <ShoppingBag className="h-4 w-4 text-dome-100" />
+                    <span>Add to Bag — {formatPrice(finalPrice, currency)}</span>
+                  </button>
+                </div>
+              </article>
             );
           })}
-        </div>
-
-        {/* Part 2: Flagship Family & Sibling Bundle Configurator */}
-        <div
-          id="bundle-builder"
-          className="mt-20 overflow-hidden rounded-[2.25rem] border border-sand-300 bg-white shadow-plush-lg"
-        >
-          <div className="grid lg:grid-cols-12">
-            {/* Left Gallery & Batch Transparency */}
-            <div className="flex flex-col justify-between bg-sand-50 p-7 sm:p-10 lg:col-span-5">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-olive-500 px-3.5 py-1 text-[11.5px] font-bold text-white">
-                  <Truck className="h-3.5 w-3.5 text-dome-100" />
-                  <span>Exclusive Batch · Free Worldwide Shipping</span>
-                </span>
-
-                <h3 className="mt-4 font-display text-2xl font-semibold text-olive-800 sm:text-3xl">
-                  {activeEdition.name}
-                </h3>
-                <p className="mt-1 font-mono text-[13px] font-semibold text-olive-600">
-                  Dimensions: {activeEdition.dimensions} · {activeEdition.assemblyTime}
-                </p>
-
-                <div className="mt-6 overflow-hidden rounded-2xl border border-sand-300 bg-white">
-                  <img
-                    src={activeEdition.lifestyleImage}
-                    alt={activeEdition.name}
-                    className="aspect-[4/3.6] w-full object-cover"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 rounded-2xl border border-clay-500/20 bg-clay-50 p-4">
-                <div className="flex items-start gap-3">
-                  <Heart className="mt-0.5 h-5 w-5 shrink-0 text-clay-500" />
-                  <p className="text-[13.5px] leading-relaxed text-olive-900">
-                    <strong className="text-clay-600">7.5% Sadaqah &amp; Community Pledge:</strong>{' '}
-                    Your order contributes <strong>{formatPrice(givebackDkk, currency)}</strong>{' '}
-                    directly toward meaningful community &amp; children’s projects.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Interactive Bundle Selector */}
-            <div className="p-7 sm:p-10 lg:col-span-7">
-              {/* Step 1: Choose Edition */}
-              <div>
-                <p className="text-[12.5px] font-bold uppercase tracking-[0.14em] text-olive-600">
-                  Step 1 · Choose Your Edition
-                </p>
-                <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-                  {PRODUCT_EDITIONS.map((ed) => {
-                    const active = ed.id === selectedEditionId;
-                    return (
-                      <button
-                        key={ed.id}
-                        type="button"
-                        onClick={() => onSelectEdition(ed.id)}
-                        className={`rounded-2xl border p-3.5 text-left transition-all ${
-                          active
-                            ? 'border-olive-500 bg-olive-50 ring-2 ring-olive-500/15'
-                            : 'border-sand-300 bg-white hover:border-olive-500/40'
-                        }`}
-                      >
-                        <p className="text-[14px] font-bold text-olive-800">{ed.shortName}</p>
-                        <p className="mt-0.5 text-[13px] font-semibold text-olive-600">
-                          {formatPrice(ed.priceDkk, currency)}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Step 2: Choose Family / Sibling / Madrasah Bundle */}
-              <div className="mt-7">
-                <p className="text-[12.5px] font-bold uppercase tracking-[0.14em] text-olive-600">
-                  Step 2 · Choose Quantity or Gift Bundle
-                </p>
-                <div className="mt-3 space-y-3">
-                  {BUNDLE_TIERS.map((tier) => {
-                    const active = tier.qty === bundleQty;
-                    const tierRaw = activeEdition.priceDkk * tier.qty;
-                    const tierFinal = Math.round(tierRaw * (1 - tier.discountPct));
-
-                    return (
-                      <button
-                        key={tier.qty}
-                        type="button"
-                        onClick={() => setBundleQty(tier.qty)}
-                        className={`flex w-full items-center justify-between gap-4 rounded-2xl border p-4 text-left transition-all ${
-                          active
-                            ? 'border-olive-500 bg-olive-50/75 ring-2 ring-olive-500/15'
-                            : 'border-sand-300 bg-white hover:border-olive-500/40'
-                        }`}
-                      >
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[15.5px] font-bold text-olive-800">
-                              {tier.title}
-                            </span>
-                            {tier.tag && (
-                              <span
-                                className={`rounded-full px-2.5 py-0.5 text-[11.5px] font-bold ${
-                                  tier.tagTone === 'clay'
-                                    ? 'bg-clay-100 text-clay-600'
-                                    : 'bg-dome-100 text-dome-600'
-                                }`}
-                              >
-                                {tier.tag}
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-0.5 text-[13.5px] text-olive-700/85">{tier.subtitle}</p>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="font-display text-xl font-bold text-olive-800">
-                            {formatPrice(tierFinal, currency)}
-                          </p>
-                          {tier.discountPct > 0 && (
-                            <p className="text-[12.5px] text-olive-600 line-through">
-                              {formatPrice(tierRaw, currency)}
-                            </p>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Optional Ramadan / Eid Gift Note */}
-              <div className="mt-6 rounded-2xl border border-sand-300 bg-sand-100/70 p-4">
-                <label className="flex cursor-pointer items-center gap-2.5 text-[14px] font-semibold text-olive-800">
-                  <input
-                    type="checkbox"
-                    checked={includeGiftCard}
-                    onChange={(e) => setIncludeGiftCard(e.target.checked)}
-                    className="h-4 w-4 rounded accent-olive-500"
-                  />
-                  <Gift className="h-4 w-4 text-dome-500" />
-                  <span>Sending as a Ramadan, Eid, or Birthday gift? Add a free note</span>
-                </label>
-
-                {includeGiftCard && (
-                  <input
-                    type="text"
-                    value={giftNote}
-                    onChange={(e) => setGiftNote(e.target.value)}
-                    placeholder="Write your heartfelt dua or gift message for the child..."
-                    className="mt-3 w-full rounded-xl border border-sand-300 bg-white px-3.5 py-2.5 text-[14.5px] text-olive-800 focus:border-olive-500 focus:outline-none"
-                  />
-                )}
-              </div>
-
-              {/* Add to Bag CTA */}
-              <button
-                type="button"
-                onClick={() =>
-                  onAddToBag(activeEdition, bundleQty, includeGiftCard ? giftNote : '')
-                }
-                className="mt-7 inline-flex w-full items-center justify-center gap-3 rounded-full bg-olive-500 px-7 py-4 text-[16px] font-bold text-white shadow-plush transition-all hover:-translate-y-0.5 hover:bg-olive-600"
-              >
-                <ShoppingBag className="h-5 w-5 text-dome-100" />
-                <span>
-                  Add to Bag — {formatPrice(discountedTotalDkk, currency)} (Free Shipping)
-                </span>
-              </button>
-
-              <p className="mt-3.5 flex items-center justify-center gap-2 text-center text-[13px] text-olive-700">
-                <ShieldCheck className="h-4 w-4 text-olive-500" />
-                <span>
-                  Ships from Aarhus, Denmark · Apple Pay, MobilePay, Klarna &amp; Shop Pay supported
-                </span>
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </section>

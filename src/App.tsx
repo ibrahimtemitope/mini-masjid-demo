@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   BUNDLE_TIERS,
   CurrencyCode,
-  EditionId,
   ProductEdition,
 } from './data/storeData';
 import { NavbarAndMarquee } from './components/NavbarAndMarquee';
@@ -20,7 +19,6 @@ import { CartDrawer, CartItem } from './components/CartDrawer';
 export const App: React.FC = () => {
   const [currency, setCurrency] = useState<CurrencyCode>('DKK');
   const [active3DVariant, setActive3DVariant] = useState<MasjidVariant>('aqsa');
-  const [selectedEditionId, setSelectedEditionId] = useState<EditionId>('aqsa-xl');
   const [cartOpen, setCartOpen] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
@@ -30,13 +28,12 @@ export const App: React.FC = () => {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const selectFrom3DForPurchase = (variant: MasjidVariant) => {
-    setSelectedEditionId(variant === 'aqsa' ? 'aqsa-xl' : 'nabawi-xl');
-    const el = document.getElementById('bundle-builder');
+  const selectFrom3DForPurchase = () => {
+    const el = document.getElementById('editions');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleAddToBag = (edition: ProductEdition, qty: 1 | 2 | 3, giftNote: string) => {
+  const handleAddToBag = (edition: ProductEdition, qty: 1 | 2 | 3) => {
     const tier = BUNDLE_TIERS.find((b) => b.qty === qty) || BUNDLE_TIERS[0];
     setCartItems((prev) => [
       ...prev,
@@ -45,7 +42,7 @@ export const App: React.FC = () => {
         edition,
         bundleQty: qty,
         discountPct: tier.discountPct,
-        giftNote,
+        giftNote: '',
       },
     ]);
     setCartOpen(true);
@@ -67,32 +64,30 @@ export const App: React.FC = () => {
       />
 
       <main className="bg-sand-100">
-        {/* 1. First Screen: Clean Real-Life Home Photo First + Warm Brand Hook */}
+        {/* 1. Giant Real-Life Home Photo First + Minimal 2-Line Hook */}
         <HeroSanctuary3D currency={currency} onJumpTo3D={jumpTo3D} />
 
-        {/* 2. All 3 Editions Pedestal Grid + Sibling/Madrasah Bundle Configurator */}
+        {/* 2. Huge Image-First Product Cards + Instant 1-Click Add to Bag */}
         <EditionsAndBundleSection
           currency={currency}
-          selectedEditionId={selectedEditionId}
-          onSelectEdition={setSelectedEditionId}
           onInspectIn3D={jumpTo3D}
           onAddToBag={handleAddToBag}
         />
 
-        {/* 3. Unified Warm Studio 3D Interactive Masjid (360° Spin, Flip Underneath, Fold-From-Flat) */}
+        {/* 3. Big Real Living-Room Photo + Real HD Video + Simple 3-Step Strip */}
+        <ScaleAndChildComparator />
+
+        {/* 4. Clean, Clutter-Free 360° 3D View */}
         <InteractiveMasjid3DAtelier
           activeVariant={active3DVariant}
           onVariantChange={setActive3DVariant}
           onSelectForPurchase={selectFrom3DForPurchase}
         />
 
-        {/* 4. Parent Reviews Section (Placeholder names & reviews ready for Jacub's real ones) */}
+        {/* 5. 3 Crisp Parent Reviews */}
         <ReviewsSection />
 
-        {/* 5. Interactive 145 cm Kid-Height & 3-Step Fold-Flat Showcase */}
-        <ScaleAndChildComparator />
-
-        {/* 6. Brand Story, Real HD Video, FAQ & Signature Olive Footer */}
+        {/* 6. 4 Short Questions + Clean Olive Footer */}
         <StoryFaqFooterSection />
       </main>
 
