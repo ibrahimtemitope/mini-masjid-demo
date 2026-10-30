@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { getShopifyBridge } from './data/shopifyBridge';
 import {
   BUNDLE_TIERS,
+  CURRENCIES,
   CurrencyCode,
   ProductEdition,
 } from './data/storeData';
@@ -10,17 +12,74 @@ import {
   InteractiveMasjid3DAtelier,
   MasjidVariant,
 } from './components/InteractiveMasjid3DAtelier';
-import { ReviewsSection } from './components/ReviewsSection';
+// import { ReviewsSection } from './components/ReviewsSection'; // Commented out until real reviews are added
 import { ScaleAndChildComparator } from './components/ScaleAndChildComparator';
 import { EditionsAndBundleSection } from './components/EditionsAndBundleSection';
 import { StoryFaqFooterSection } from './components/StoryFaqFooterSection';
 import { CartDrawer, CartItem } from './components/CartDrawer';
 
+function getInitialCurrency(): CurrencyCode {
+  const shopCurr = getShopifyBridge()?.activeCurrency?.toUpperCase();
+  if (shopCurr && shopCurr in CURRENCIES) {
+    return shopCurr as CurrencyCode;
+  }
+  return 'DKK';
+}
+
+async function syncItemsToShopifyCart(items: CartItem[]): Promise<void> {
+  const bridge = getShopifyBridge();
+  if (!bridge?.isShopify) return;
+
+  try {
+    await fetch(bridge.routes?.cartClear || '/cart/clear.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (items.length === 0) return;
+
+    const qtyByVariant = new Map<number, number>();
+    for (const item of items) {
+      qtyByVariant.set(
+        item.edition.variantId,
+        (qtyByVariant.get(item.edition.variantId) || 0) + item.bundleQty
+      );
+    }
+
+    await fetch(bridge.routes?.cartAdd || '/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: Array.from(qtyByVariant.entries()).map(([id, quantity]) => ({
+          id,
+          quantity,
+        })),
+      }),
+    });
+  } catch {
+    // Non-blocking cart sync
+  }
+}
+
 export const App: React.FC = () => {
-  const [currency, setCurrency] = useState<CurrencyCode>('DKK');
+  const [currency, setCurrency] = useState<CurrencyCode>(getInitialCurrency);
   const [active3DVariant, setActive3DVariant] = useState<MasjidVariant>('aqsa');
   const [cartOpen, setCartOpen] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartSyncing, setCartSyncing] = useState<boolean>(false);
+
+  // Keep native Shopify /cart.js synchronized whenever bag items change
+  useEffect(() => {
+    if (!getShopifyBridge()?.isShopify) return;
+    let cancelled = false;
+    setCartSyncing(true);
+    syncItemsToShopifyCart(cartItems).finally(() => {
+      if (!cancelled) setCartSyncing(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [cartItems]);
 
   const jumpTo3D = (variant: MasjidVariant) => {
     setActive3DVariant(variant);
@@ -64,30 +123,24 @@ export const App: React.FC = () => {
       />
 
       <main className="bg-sand-100">
-        {/* 1. Giant Real-Life Home Photo First + Minimal 2-Line Hook */}
         <HeroSanctuary3D currency={currency} onJumpTo3D={jumpTo3D} />
 
-        {/* 2. Huge Image-First Product Cards + Instant 1-Click Add to Bag */}
         <EditionsAndBundleSection
           currency={currency}
           onInspectIn3D={jumpTo3D}
           onAddToBag={handleAddToBag}
         />
 
-        {/* 3. Big Real Living-Room Photo + Real HD Video + Simple 3-Step Strip */}
         <ScaleAndChildComparator />
 
-        {/* 4. Clean, Clutter-Free 360° 3D View */}
         <InteractiveMasjid3DAtelier
           activeVariant={active3DVariant}
           onVariantChange={setActive3DVariant}
           onSelectForPurchase={selectFrom3DForPurchase}
         />
 
-        {/* 5. 3 Crisp Parent Reviews */}
-        <ReviewsSection />
+        {/* <ReviewsSection /> — Commented out until real verified customer reviews are ready */}
 
-        {/* 6. 4 Short Questions + Clean Olive Footer */}
         <StoryFaqFooterSection />
       </main>
 
@@ -97,6 +150,7 @@ export const App: React.FC = () => {
         items={cartItems}
         onRemoveItem={handleRemoveItem}
         currency={currency}
+        cartSyncing={cartSyncing}
       />
     </div>
   );

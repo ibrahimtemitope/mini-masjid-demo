@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Globe, Menu, ShoppingBag, X } from 'lucide-react';
+import { getThemeText, resolveAsset } from '../data/shopifyBridge';
 import { CURRENCIES, CurrencyCode } from '../data/storeData';
 
 interface Props {
@@ -17,27 +18,31 @@ export const NavbarAndMarquee: React.FC<Props> = ({
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const announcement = getThemeText(
+    'announcementText',
+    'Free Worldwide Shipping · Builds in 5 Minutes · 7.5% Community Giveback'
+  );
+
   const navLinks = [
     { href: '#editions', label: 'Shop' },
     { href: '#how-it-works', label: 'How It Works' },
     { href: '#atelier-3d', label: '3D View' },
     { href: '#mission', label: 'Our Mission' },
-    { href: '#reviews', label: 'Reviews' },
+    { href: '#faq', label: 'FAQ' },
+    // { href: '#reviews', label: 'Reviews' }, // Uncomment once real customer reviews are added
   ];
 
   return (
     <>
-      {/* Clean Single-Line Announcement Strip */}
       <div className="bg-olive-500 px-4 py-2 text-center text-[12px] font-semibold tracking-wide text-white">
-        Free Worldwide Shipping · Builds in 5 Minutes · 7.5% Community Giveback
+        {announcement}
       </div>
 
-      {/* Minimal Warm Cream Header */}
       <header className="sticky top-0 z-40 border-b border-sand-300/80 bg-sand-100/95 backdrop-blur-md">
         <div className="mx-auto flex h-[68px] max-w-[1320px] items-center justify-between gap-4 px-4 sm:h-[74px] sm:px-6 lg:px-8">
           <a href="#top" className="flex shrink-0 items-center">
             <img
-              src="/assets/logo.png"
+              src={resolveAsset('/assets/logo.png')}
               alt="MiniMasjid"
               className="h-12 w-auto object-contain sm:h-13"
             />

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowRight, Rotate3d, Star } from 'lucide-react';
+import { ArrowRight, Rotate3d, Sparkles } from 'lucide-react';
+import { getThemeText, resolveAsset } from '../data/shopifyBridge';
 import { CurrencyCode, formatPrice } from '../data/storeData';
 import { MasjidVariant } from './InteractiveMasjid3DAtelier';
 
@@ -8,26 +9,32 @@ interface Props {
   onJumpTo3D: (variant: MasjidVariant) => void;
 }
 
-const HERO_PHOTOS = [
-  {
-    src: '/assets/aqsa-candlelight-home.jpg',
-    label: 'Living Room Glow',
-    alt: 'MiniMasjid Al-Aqsa glowing warmly in a family home',
-  },
-  {
-    src: '/assets/aqsa-kid-inside-home.jpg',
-    label: '145 cm Walk-In Size',
-    alt: 'Child playing inside the 145 cm MiniMasjid XL',
-  },
-  {
-    src: '/assets/nabawi-studio.png',
-    label: 'Nabawi XL',
-    alt: 'MiniMasjid Masjid an-Nabawi XL Edition',
-  },
-];
-
 export const HeroSanctuary3D: React.FC<Props> = ({ currency, onJumpTo3D }) => {
   const [activePhoto, setActivePhoto] = useState(0);
+
+  const heroPhotos = [
+    {
+      src: resolveAsset('/assets/aqsa-kid-inside-home.jpg'),
+      label: '145 cm Walk-In Size',
+      alt: 'Child playing inside the 145 cm MiniMasjid XL',
+    },
+    {
+      src: resolveAsset('/assets/aqsa-candlelight-home.jpg'),
+      label: 'Living Room Glow',
+      alt: 'MiniMasjid Al-Aqsa glowing warmly in a family home',
+    },
+    {
+      src: resolveAsset('/assets/nabawi-studio.png'),
+      label: 'Nabawi XL',
+      alt: 'MiniMasjid Masjid an-Nabawi XL Edition',
+    },
+  ];
+
+  const headline = getThemeText('heroHeadline', 'Faith Through Play.');
+  const subtext = getThemeText(
+    'heroSubtext',
+    'Walk-in mosque playhouses (120 × 120 × 145 cm). Builds in 5 minutes with zero tools — folds flat behind your sofa.'
+  );
 
   return (
     <section id="top" className="bg-sand-100 pb-14 pt-0 sm:pb-20 sm:pt-6 lg:pt-8">
@@ -37,18 +44,17 @@ export const HeroSanctuary3D: React.FC<Props> = ({ currency, onJumpTo3D }) => {
           <div className="order-1 lg:col-span-7">
             <div className="overflow-hidden bg-white shadow-plush sm:rounded-[2rem] sm:border sm:border-sand-300 sm:p-2.5">
               <img
-                src={HERO_PHOTOS[activePhoto].src}
-                alt={HERO_PHOTOS[activePhoto].alt}
+                src={heroPhotos[activePhoto].src}
+                alt={heroPhotos[activePhoto].alt}
                 fetchPriority="high"
                 className="aspect-[4/4.15] w-full object-cover sm:aspect-[4/3.85] sm:rounded-[1.5rem]"
               />
             </div>
 
-            {/* Clean 3-Photo Thumbnails */}
             <div className="mt-3 flex gap-2.5 px-4 sm:px-0">
-              {HERO_PHOTOS.map((photo, idx) => (
+              {heroPhotos.map((photo, idx) => (
                 <button
-                  key={photo.src}
+                  key={photo.label}
                   type="button"
                   onClick={() => setActivePhoto(idx)}
                   className={`group flex flex-1 items-center gap-2.5 rounded-2xl border bg-white p-1.5 text-left transition-all ${
@@ -72,25 +78,25 @@ export const HeroSanctuary3D: React.FC<Props> = ({ currency, onJumpTo3D }) => {
 
           {/* MINIMAL, WARM COPY (5 of 12 columns) */}
           <div className="order-2 px-5 sm:px-0 lg:col-span-5">
+            {/* Review rating pill commented out until real verified customer reviews are added:
             <a
               href="#reviews"
               className="inline-flex items-center gap-1.5 rounded-full border border-dome-400/40 bg-dome-50 px-3.5 py-1 text-[12.5px] font-bold text-dome-600"
             >
-              <span className="flex items-center text-dome-500">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-3.5 w-3.5 fill-dome-500 text-dome-500" />
-                ))}
-              </span>
               <span>4.9 / 5</span>
             </a>
+            */}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-dome-400/40 bg-dome-50 px-3.5 py-1 text-[12.5px] font-bold text-dome-600">
+              <Sparkles className="h-3.5 w-3.5 text-dome-500" />
+              <span>Designed in Denmark · Screen-Free Play</span>
+            </span>
 
             <h1 className="mt-4 font-display text-[2.4rem] font-medium leading-[1.06] tracking-tight text-olive-800 sm:text-[3.4rem]">
-              Faith Through Play.
+              {headline}
             </h1>
 
             <p className="mt-3.5 max-w-md text-[17px] leading-[1.6] text-olive-800/85">
-              Walk-in mosque playhouses (<strong>120 × 120 × 145 cm</strong>). Builds in 5 minutes
-              with zero tools — folds flat behind your sofa.
+              {subtext}
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
